@@ -1,0 +1,4 @@
+
+# read in raw data file
+d <- read.csv( "01-Data-Raw/ca_hei.csv")
+
