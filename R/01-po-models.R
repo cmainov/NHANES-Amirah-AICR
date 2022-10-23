@@ -198,7 +198,7 @@ write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
 
 
 
-### Multiple Regression Models ###
+### Multiple Regression and Poisson Regression Models ###
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # use functions from `survey` package
@@ -236,9 +236,11 @@ mlsout <- svyglm( Mealsout ~ factor( foodsec_bin ) + Gender2 +
                 design = des.ca )
 
 mlsout.sum <- summary( mlsout )  # store model results
-coef.table.mlsout <- mlsout.sum$coefficients # coefficients table for saving
-
+coef.table.mlsout <- data.frame( mlsout.sum$coefficients )# coefficients table for saving
+coef.table.mlsout$Estimate <- exp( coef.table.mlsout$Estimate )
 # save coefficients tables
 write.csv( coef.table.p.fafh, "02-Tables-Figures/04-perc-fafh-reg-coef.csv")
 write.csv( coef.table.fafh, "02-Tables-Figures/05-fafh-reg-coef.csv")
 write.csv( coef.table.mlsout, "02-Tables-Figures/06-mlsout-reg-coef.csv")
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
