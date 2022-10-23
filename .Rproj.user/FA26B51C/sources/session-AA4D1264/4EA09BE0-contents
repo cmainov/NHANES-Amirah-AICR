@@ -133,8 +133,8 @@ write.csv( fi.samp$pred.probs, "02-Tables-Figures/02-modelppfi.csv")
 fs.samp <- res_fun( mult.mod )
 
 # save tables in CSV format for fs sample
-write.csv( fs.samp$coefs, "02-Tables-Figures/02-modelorfs.csv")
-write.csv( fs.samp$conf.int, "02-Tables-Figures/02-modelcifs.csv")
-write.csv( fs.samp$pred.probs, "02-Tables-Figures/02-modelppfs.csv")
+write.csv( fs.samp$coefs, "02-Tables-Figures/03-modelorfs.csv")
+write.csv( fs.samp$conf.int, "02-Tables-Figures/03-modelcifs.csv")
+write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
 
 
