@@ -1,9 +1,11 @@
 library( tidyverse )
 library( VGAM )  # proportional odds models
 library( nnet )  # for multinomial logit models
-library( survey )
-library( RNHANES )
-library( haven )
+library( survey ) # for modeling complex survey data
+library( RNHANES ) # for downloading raw NHANES data
+library( haven ) # for reading in foreign file formats (eg., .XPT files)
+
+
 ### Read-in Data/Data-Wrangling ###
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
