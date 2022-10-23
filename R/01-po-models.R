@@ -204,6 +204,41 @@ write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
 # use functions from `survey` package
 
 # specify survey design
-svydesign( id = ~SDMVPSU, weights = ~WTINT5YR, strata = ~SDMVSTRA, 
+des <- svydesign( id = ~SDMVPSU, weights = ~WTINT5YR, strata = ~SDMVSTRA, 
           nest = TRUE, survey.lonely.psu = "adjust", data = d.2)
 
+# subset the survey design appropriately using `subset` to specify the three subsets we will
+# be working with
+des.ca <- subset( des, CA == 1 )
+
+# PercFAFH outcome variable
+hist( d.2$PercFAFH, breaks = 30 ) # strong right skew, consider alternative modeling strategy
+p.fafh <- svyglm( PercFAFH ~ factor( foodsec_bin ) + Gender2 +
+          Age + Race2 +HHSize2 + IncPovRat2 + EDU + MartitalStat_cat +
+          FoodAsstP2 + SmokStat + ALCUSE2, design = des.ca )
+
+p.fafh.sum <- summary( p.fafh ) # store model results
+coef.table.p.fafh <- p.fafh.sum$coefficients # coefficients table for saving
+
+# FAFH outcome variable
+hist( d.2$FAFH, breaks = 30 ) # strong right skew, consider alternative modeling strategy
+fafh <- svyglm( FAFH ~ factor( foodsec_bin ) + Gender2 +
+                    Age + Race2 +HHSize2 + IncPovRat2 + EDU + MartitalStat_cat +
+                    FoodAsstP2 + SmokStat + ALCUSE2, design = des.ca )
+
+fafh.sum <- summary( fafh )  # store model results
+coef.table.fafh <- fafh.sum$coefficients # coefficients table for saving
+
+# Mealsout outcome variable (used Poisson model given this is a count variable)
+mlsout <- svyglm( Mealsout ~ factor( foodsec_bin ) + Gender2 +
+                  Age + Race2 +HHSize2 + IncPovRat2 + EDU + MartitalStat_cat +
+                  FoodAsstP2 + SmokStat + ALCUSE2, family = "poisson",
+                design = des.ca )
+
+mlsout.sum <- summary( mlsout )  # store model results
+coef.table.mlsout <- mlsout.sum$coefficients # coefficients table for saving
+
+# save coefficients tables
+write.csv( coef.table.p.fafh, "02-Tables-Figures/04-perc-fafh-reg-coef.csv")
+write.csv( coef.table.fafh, "02-Tables-Figures/05-fafh-reg-coef.csv")
+write.csv( coef.table.mlsout, "02-Tables-Figures/06-mlsout-reg-coef.csv")
