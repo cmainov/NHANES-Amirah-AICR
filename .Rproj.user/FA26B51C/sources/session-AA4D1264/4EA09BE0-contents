@@ -75,7 +75,7 @@ sum.mm <- summary(model.object)
 odds <- exp( sum.mm$coefficients )
 
 # confidence intervals
-ci <- confint( model.object) # generates an object of class `array`
+ci <- exp( confint( model.object) ) # generates an object of class `array` with tables for CI's that are exponentiated so we get confidence bounds for ORs
 dim.ci <- dim( ci )[3] # dimensions in `ci` array
 len.ci <- dim( ci )[1] # length in `ci` array
 ci.df <- data.frame( coln = 1: len.ci ) # initialize data.frame for results storage
