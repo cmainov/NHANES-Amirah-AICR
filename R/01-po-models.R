@@ -209,7 +209,7 @@ write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
 des <- svydesign( id = ~SDMVPSU, weights = ~WTINT5YR, strata = ~SDMVSTRA, 
           nest = TRUE, survey.lonely.psu = "adjust", data = d.2)
 
-# subset the survey design appropriately using `subset` to specify the three subsets we will
+# subset the survey design appropriately using `subset` to specify the subset we will
 # be working with
 des.ca <- subset( des, CA == 1 )
 
