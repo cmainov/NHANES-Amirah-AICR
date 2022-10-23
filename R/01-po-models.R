@@ -1,7 +1,9 @@
 library( tidyverse )
 library( VGAM )  # proportional odds models
 library( nnet )  # for multinomial logit models
-
+library( survey )
+library( RNHANES )
+library( haven )
 ### Read-in Data/Data-Wrangling ###
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -11,29 +13,66 @@ d <- read.csv( "01-Data-Raw/ca_hei.csv")
 # read in helper function
 source( "R/utils.R")
 
+## read in NHANES data to get correct SDMVPSU and SDMVSTRA and weights ##
+## the raw dataset povided has a number of missing values for these critical variables ##
+
+# read/assign data from `RHANES` package
+cycs <- paste0( "0", c( 7, 9, 11, 13 ) )
+yrs <- c( "2007-2008", "2009-2010", "2011-2012", "2013-2014")
+
+for ( i in 1:length( yrs ) ){
+  
+assign( paste0( "dem.", cycs[i] ) , nhanes_load_data( "DEMO", yrs[i] ) )
+  
+}
+
+# manually import 2015-16 and 2017-18 data
+dem.015 <- read_xpt( file = 'https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DEMO_I.XPT' )
+dem.017 <- read_xpt( file = 'https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/DEMO_J.XPT' )
+
+# row bind the relevant columns
+bind.sdvm <- rbind( dem.07[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR" ) ],
+       dem.09[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR"  ) ], 
+       dem.011[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR"  ) ], 
+       dem.013[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR"  ) ], 
+       dem.015[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR"  ) ],
+       dem.017[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR"  ) ] )
+
+
+
 # compute quartiles only on cancer survivors and generate normalized weights (note: first adjust weights based on number of cycles in the analysis)
 d.2 <- d %>%
   filter( CA == 1 ) %>%   # filter cancer survivors
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
-          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ),
-          norm.wt = ( WTINT2YR /5 ) / mean( d$WTINT2YR, na.rm = T ) ) %>% # rank variables for HEI and FAFH and normalized weights
-  full_join( d, . )  # full join back to original data to keep all rows intact for analysis
+          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
+  full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
+  select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
+  left_join( . , bind.sdvm, by = "SEQN" ) %>%
+  mutate( WTINT5YR = WTINT2YR / 5,
+          norm.wt = WTINT5YR / mean( bind.sdvm$WTINT2YR, na.rm = T ) ) # recompute weights and compute normalized weights
 
 # datasets for stratified analyses #
 d.2.fi <- d %>% # food insecure
   filter( CA == 1 & foodsec_bin == 1 ) %>%   # filter cancer survivors and food insecure
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
-          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ),
-          norm.wt = ( WTINT2YR /5 ) / mean( d$WTINT2YR, na.rm = T ) ) %>% # rank variables for HEI and FAFH and normalized weights
-  full_join( d, . )  # full join back to original data to keep all rows intact for analysis
+          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
+  full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
+  select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
+  left_join( . , bind.sdvm, by = "SEQN" ) %>%
+  mutate( WTINT5YR = WTINT2YR / 5,
+          norm.wt = WTINT5YR / mean( bind.sdvm$WTINT2YR, na.rm = T ) ) # recompute weights and compute normalized weights
 
 # datasets for stratified analyses #
 d.2.fs <- d %>% # food secure
   filter( CA == 1 & foodsec_bin == 1 ) %>%   # filter cancer survivors and food secure
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
-          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ),
-          norm.wt = ( WTINT2YR /5 ) / mean( d$WTINT2YR, na.rm = T ) ) %>% # rank variables for HEI and FAFH and normalized weights
-  full_join( d, . )  # full join back to original data to keep all rows intact for analysis
+          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
+  full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
+  select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
+  left_join( . , bind.sdvm, by = "SEQN" ) %>%
+  mutate( WTINT5YR = WTINT2YR / 5,
+          norm.wt = WTINT5YR / mean( bind.sdvm$WTINT2YR, na.rm = T ) ) # recompute weights and compute normalized weights
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -157,4 +196,14 @@ write.csv( fs.samp$conf.int, "02-Tables-Figures/03-modelcifs.csv")
 write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+
+### Multiple Regression Models ###
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# use functions from `survey` package
+
+# specify survey design
+svydesign( id = ~SDMVPSU, weights = ~WTINT5YR, strata = ~SDMVSTRA, 
+          nest = TRUE, survey.lonely.psu = "adjust", data = d.2)
 
