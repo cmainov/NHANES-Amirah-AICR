@@ -2,6 +2,9 @@ library( tidyverse )
 library( VGAM )  # proportional odds models
 library( nnet )  # for multinomial logit models
 
+### Read-in Data/Data-Wrangling ###
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # read in raw data file
 d <- read.csv( "01-Data-Raw/ca_hei.csv")
 
@@ -31,8 +34,15 @@ d.2.fs <- d %>% # food secure
           fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ),
           norm.wt = ( WTINT2YR /5 ) / mean( d$WTINT2YR, na.rm = T ) ) %>% # rank variables for HEI and FAFH and normalized weights
   full_join( d, . )  # full join back to original data to keep all rows intact for analysis
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# proportional odds model (not used)
+
+
+
+### Fit Models ###
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## proportional odds model (not used) ##
 mod3 <- vglm( factor( hei.q4, ordered = T ) ~ fafh.q4 + Gender2 +
                 Age + Race2 +HHSize2 + IncPovRat2 + EDU + MartitalStat_cat +
                 FoodAsstP2 + SmokStat + ALCUSE2,
@@ -41,7 +51,7 @@ mod3 <- vglm( factor( hei.q4, ordered = T ) ~ fafh.q4 + Gender2 +
 summary( mod3 )
 
 
-## multinomial logistic regression model ##
+## multinomial logistic regression models ##
 
 
 # fit on entire sample
@@ -62,7 +72,11 @@ mult.mod.fs <- multinom( factor( hei.q4, ordered = T ) ~ fafh.q4 + Gender2 +
                            FoodAsstP2 + SmokStat + ALCUSE2,
                          data = d.2.fs, weights = norm.wt )
 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+### Results-Generating Function ###
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # create function to generate results #
 
@@ -75,7 +89,7 @@ sum.mm <- summary(model.object)
 odds <- exp( sum.mm$coefficients )
 
 # confidence intervals
-ci <- confint( model.object) # generates an object of class `array`
+ci <- exp( confint( model.object) ) # generates an object of class `array` with tables for CI's that are exponentiated so we get confidence bounds for ORs
 dim.ci <- dim( ci )[3] # dimensions in `ci` array
 len.ci <- dim( ci )[1] # length in `ci` array
 ci.df <- data.frame( coln = 1: len.ci ) # initialize data.frame for results storage
@@ -109,7 +123,12 @@ colnames( pp.tab ) <- c( "FAFH", paste0( "HEI.Q", 1:4 ) )
 
 return( list( coefs = odds, conf.int = ci.df, pred.probs = pp.tab ) )
 }
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+
+### Generate Results ###
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## run function on entire sample ##
 ent.samp <- res_fun( mult.mod )
@@ -133,8 +152,9 @@ write.csv( fi.samp$pred.probs, "02-Tables-Figures/02-modelppfi.csv")
 fs.samp <- res_fun( mult.mod )
 
 # save tables in CSV format for fs sample
-write.csv( fs.samp$coefs, "02-Tables-Figures/02-modelorfs.csv")
-write.csv( fs.samp$conf.int, "02-Tables-Figures/02-modelcifs.csv")
-write.csv( fs.samp$pred.probs, "02-Tables-Figures/02-modelppfs.csv")
+write.csv( fs.samp$coefs, "02-Tables-Figures/03-modelorfs.csv")
+write.csv( fs.samp$conf.int, "02-Tables-Figures/03-modelcifs.csv")
+write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
