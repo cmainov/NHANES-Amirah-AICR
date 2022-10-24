@@ -43,7 +43,7 @@ bind.sdvm <- rbind( dem.07[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR" ) ],
 
 
 # compute quartiles only on cancer survivors and generate normalized weights (note: first adjust weights based on number of cycles in the analysis)
-d.2 <- d %>%
+( d.2 <- d %>%
   filter( CA == 1 ) %>%   # filter cancer survivors
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
           fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
@@ -51,7 +51,8 @@ d.2 <- d %>%
   select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
   left_join( . , bind.sdvm, by = "SEQN" ) %>%
   mutate( WTINT5YR = WTINT2YR / 5,
-          norm.wt = WTINT5YR / mean( bind.sdvm$WTINT2YR, na.rm = T ) ) # recompute weights and compute normalized weights
+          norm.wt = WTINT5YR / mean( bind.sdvm$WTINT2YR, na.rm = T ) ) )%>% # recompute weights and compute normalized weights
+  write.csv( ., "02-Data-Wrangled/hei-correct-wts.csv")
 
 # datasets for stratified analyses #
 d.2.fi <- d %>% # food insecure
@@ -175,27 +176,27 @@ return( list( coefs = odds, conf.int = ci.df, pred.probs = pp.tab ) )
 ent.samp <- res_fun( mult.mod )
 
 # save tables in CSV format for entire sample
-write.csv( ent.samp$coefs, "02-Tables-Figures/01-modelor.csv")
-write.csv( ent.samp$conf.int, "02-Tables-Figures/01-modelci.csv")
-write.csv( ent.samp$pred.probs, "02-Tables-Figures/01-modelpp.csv")
+write.csv( ent.samp$coefs, "03-Tables-Figures/01-modelor.csv")
+write.csv( ent.samp$conf.int, "03-Tables-Figures/01-modelci.csv")
+write.csv( ent.samp$pred.probs, "03-Tables-Figures/01-modelpp.csv")
 
 
 ## run function on food insecure subset ##
 fi.samp <- res_fun( mult.mod )
 
 # save tables in CSV format for fi sample
-write.csv( fi.samp$coefs, "02-Tables-Figures/02-modelorfi.csv")
-write.csv( fi.samp$conf.int, "02-Tables-Figures/02-modelcifi.csv")
-write.csv( fi.samp$pred.probs, "02-Tables-Figures/02-modelppfi.csv")
+write.csv( fi.samp$coefs, "03-Tables-Figures/02-modelorfi.csv")
+write.csv( fi.samp$conf.int, "03-Tables-Figures/02-modelcifi.csv")
+write.csv( fi.samp$pred.probs, "03-Tables-Figures/02-modelppfi.csv")
 
 
 ## run function on food secure subset ##
 fs.samp <- res_fun( mult.mod )
 
 # save tables in CSV format for fs sample
-write.csv( fs.samp$coefs, "02-Tables-Figures/03-modelorfs.csv")
-write.csv( fs.samp$conf.int, "02-Tables-Figures/03-modelcifs.csv")
-write.csv( fs.samp$pred.probs, "02-Tables-Figures/03-modelppfs.csv")
+write.csv( fs.samp$coefs, "03-Tables-Figures/03-modelorfs.csv")
+write.csv( fs.samp$conf.int, "03-Tables-Figures/03-modelcifs.csv")
+write.csv( fs.samp$pred.probs, "03-Tables-Figures/03-modelppfs.csv")
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -241,8 +242,8 @@ mlsout.sum <- summary( mlsout )  # store model results
 coef.table.mlsout <- data.frame( mlsout.sum$coefficients )# coefficients table for saving
 coef.table.mlsout$Estimate <- exp( coef.table.mlsout$Estimate )
 # save coefficients tables
-write.csv( coef.table.p.fafh, "02-Tables-Figures/04-perc-fafh-reg-coef.csv")
-write.csv( coef.table.fafh, "02-Tables-Figures/05-fafh-reg-coef.csv")
-write.csv( coef.table.mlsout, "02-Tables-Figures/06-mlsout-reg-coef.csv")
+write.csv( coef.table.p.fafh, "03-Tables-Figures/04-perc-fafh-reg-coef.csv")
+write.csv( coef.table.fafh, "03-Tables-Figures/05-fafh-reg-coef.csv")
+write.csv( coef.table.mlsout, "03-Tables-Figures/06-mlsout-reg-coef.csv")
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
