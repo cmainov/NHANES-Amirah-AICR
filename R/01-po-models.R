@@ -182,7 +182,7 @@ write.csv( ent.samp$pred.probs, "03-Tables-Figures/01-modelpp.csv")
 
 
 ## run function on food insecure subset ##
-fi.samp <- res_fun( mult.mod )
+fi.samp <- res_fun( mult.mod.fi )
 
 # save tables in CSV format for fi sample
 write.csv( fi.samp$coefs, "03-Tables-Figures/02-modelorfi.csv")
@@ -191,7 +191,7 @@ write.csv( fi.samp$pred.probs, "03-Tables-Figures/02-modelppfi.csv")
 
 
 ## run function on food secure subset ##
-fs.samp <- res_fun( mult.mod )
+fs.samp <- res_fun( mult.mod.fs )
 
 # save tables in CSV format for fs sample
 write.csv( fs.samp$coefs, "03-Tables-Figures/03-modelorfs.csv")
