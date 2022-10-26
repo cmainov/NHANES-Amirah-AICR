@@ -58,7 +58,7 @@ bind.sdvm <- rbind( dem.07[, c( "SEQN", "SDMVSTRA", "SDMVPSU", "WTINT2YR" ) ],
 d.2.fi <- d %>% # food insecure
   filter( CA == 1 & foodsec_bin == 1 ) %>%   # filter cancer survivors and food insecure
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
-          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
+          fafh.q4 = as.factor( quant_cut( "FAFH", 3, . ) ) ) %>% # rank variables for HEI and FAFH
   full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
   select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
   left_join( . , bind.sdvm, by = "SEQN" ) %>%
@@ -69,7 +69,7 @@ d.2.fi <- d %>% # food insecure
 d.2.fs <- d %>% # food secure
   filter( CA == 1 & foodsec_bin == 1 ) %>%   # filter cancer survivors and food secure
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
-          fafh.q4 = as.factor( quant_cut( "FAFH", 4, . ) ) ) %>% # rank variables for HEI and FAFH
+          fafh.q4 = as.factor( quant_cut( "FAFH", 3, . ) ) ) %>% # rank variables for HEI and FAFH
   full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
   select( -c( SDMVPSU, SDMVSTRA, WTINT2YR ) ) %>%
   left_join( . , bind.sdvm, by = "SEQN" ) %>%
