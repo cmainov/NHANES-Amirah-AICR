@@ -239,7 +239,7 @@ mlsout <- svyglm( Mealsout ~ factor( foodsec_bin ) + Gender2 +
                 design = des.ca )
 
 mlsout.sum <- summary( mlsout )  # store model results
-coef.table.mlsout <- data.frame( mlsout.sum$coefficients )# coefficients table for saving
+coef.table.mlsout <- data.frame( mlsout.sum$coefficients ) # coefficients table for saving
 coef.table.mlsout$Estimate <- exp( coef.table.mlsout$Estimate )
 # save coefficients tables
 write.csv( coef.table.p.fafh, "03-Tables-Figures/04-perc-fafh-reg-coef.csv")
