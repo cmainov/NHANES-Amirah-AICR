@@ -67,7 +67,7 @@ d.2.fi <- d %>% # food insecure
 
 # datasets for stratified analyses #
 d.2.fs <- d %>% # food secure
-  filter( CA == 1 & foodsec_bin == 1 ) %>%   # filter cancer survivors and food secure
+  filter( CA == 1 & foodsec_bin == 0 ) %>%   # filter cancer survivors and food secure
   mutate( hei.q4 = as.factor( quant_cut( "HEI2015_TOTAL_SCORE", 4, . ) ),
           fafh.q4 = as.factor( quant_cut( "FAFH", 3, . ) ) ) %>% # rank variables for HEI and FAFH
   full_join( d, . ) %>% # full join back to original data to keep all rows intact for analysis
